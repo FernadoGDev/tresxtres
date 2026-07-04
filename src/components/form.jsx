@@ -19,6 +19,8 @@ const jugadorVacio = {
   dni: "",
   telefono: "",
   email: "",
+  barrio: "",
+  direccion: "",
   fechaNacimiento: null,
   confirmado: false,
   editando: false,
@@ -29,6 +31,7 @@ export default function Formulario() {
   const [jugadores, setJugadores] = useState([{ ...jugadorVacio }]);
 const [seleccionCapitan, setSeleccionCapitan] = useState(false);
 const [capitan, setCapitan] = useState(null);
+const [errores, setErrores] = useState({});
   // 🎨 estilos inputs oscuros
  const inputStyles = {
   "& .MuiOutlinedInput-root": {
@@ -46,30 +49,95 @@ const [capitan, setCapitan] = useState(null);
     color: "#22c55e",
   },
 };
+const handleChangeJugador = (index, field, value) => {
+  const nuevos = [...jugadores];
+  nuevos[index][field] = value;
+  setJugadores(nuevos);
 
-  const handleChangeJugador = (index, field, value) => {
-    const nuevos = [...jugadores];
-    nuevos[index][field] = value;
-    setJugadores(nuevos);
-  };
+  setErrores(prev => ({
+    ...prev,
+    [index]: {
+      ...prev[index],
+      [field]: false,
+    },
+  }));
+};
+const confirmarJugador = async (index) => {
+  const nuevos = [...jugadores];
+  const j = nuevos[index];
 
-  const confirmarJugador = (index) => {
-    const nuevos = [...jugadores];
-    const j = nuevos[index];
+const erroresJugador = {
+  nombre: !j.nombre,
+  apellido: !j.apellido,
+  dni: !j.dni,
+  telefono: !j.telefono,
+  email: !j.email,
+  barrio: !j.barrio,
+  direccion: !j.direccion,
+  fechaNacimiento: !j.fechaNacimiento,
+};
 
-    if (!j.nombre || !j.apellido || !j.dni ||  !j.telefono ||
-  !j.email) return;
+  const tieneErrores = Object.values(erroresJugador).some(Boolean);
 
+  if (tieneErrores) {
+    setErrores(prev => ({
+      ...prev,
+      [index]: erroresJugador,
+    }));
+    return;
+  }
+
+  // si está todo bien quitamos los errores
+  setErrores(prev => ({
+    ...prev,
+    [index]: {},
+  }));
+  // ============================
+  // 1. Verificar repetido en el mismo equipo
+  // ============================
+  const repetido = jugadores.some(
+    (jugador, i) =>
+      i !== index &&
+      jugador.confirmado &&
+      jugador.dni === j.dni
+  );
+
+  if (repetido) {
+    alert("Ese jugador ya fue agregado a este equipo.");
+    return;
+  }
+
+  try {
+
+    // ============================
+    // 2. Verificar en la base de datos
+    // ============================
+    const existe = await servicio1.verificarJugador(j.dni);
+
+    if (existe.registrado) {
+      alert(
+        `El Dni ya está registrado en otro equipo.`
+      );
+      return;
+    }
+
+    // ============================
+    // Confirmar jugador
+    // ============================
     nuevos[index].confirmado = true;
     nuevos[index].editando = false;
 
-    // solo agrega si es el último
     if (jugadores.length < 5 && index === jugadores.length - 1) {
       nuevos.push({ ...jugadorVacio });
     }
 
     setJugadores(nuevos);
-  };
+
+  } catch (error) {
+    console.error(error);
+    alert("No se pudo verificar el jugador.");
+  }
+};
 
   const editarJugador = (index) => {
     const nuevos = [...jugadores];
@@ -93,16 +161,18 @@ const handleSubmit = async () => {
   if (jugadoresConfirmados < 3 || !equipo) return;
 
   try {
-    const jugadoresValidos = jugadores
-      .filter(j => j.confirmado)
-      .map(j => ({
-        nombre: j.nombre,
-        apellido: j.apellido,
-        dni: j.dni,
-        fechaNacimiento: j.fechaNacimiento,
-        telefono: j.telefono,
-        email: j.email,
-      }));
+   const jugadoresValidos = jugadores
+  .filter(j => j.confirmado)
+  .map(j => ({
+    nombre: j.nombre,
+    apellido: j.apellido,
+    dni: j.dni,
+    fechaNacimiento: j.fechaNacimiento,
+    telefono: j.telefono,
+    email: j.email,
+    barrio: j.barrio,
+    direccion: j.direccion,
+  }));
 
    const payload = {
   equipo,
@@ -256,6 +326,27 @@ if (seleccionCapitan) {
       >
         Confirmar equipo
       </Button>
+      <Button
+  variant="outlined"
+  onClick={() => {
+    setSeleccionCapitan(false);
+    setCapitan(null); // opcional
+  }}
+  sx={{
+    mt: 2,
+    borderColor: "#fff",
+    color: "#fff",
+    px: 5,
+    py: 1.5,
+    fontSize: "1rem",
+    "&:hover": {
+      borderColor: "#f97316",
+      backgroundColor: "rgba(255,255,255,0.08)",
+    },
+  }}
+>
+  ← Volver a editar
+</Button>
     </Box>
   );
 }
@@ -315,6 +406,7 @@ if (seleccionCapitan) {
     value={equipo}
     onChange={(e) => setEquipo(e.target.value)}
     fullWidth
+    
     sx={inputStyles}
   />
 </Box>
@@ -390,6 +482,8 @@ if (seleccionCapitan) {
                   onChange={(e) =>
                     handleChangeJugador(index, "nombre", e.target.value)
                   }
+                   error={errores[index]?.nombre}
+  helperText={errores[index]?.nombre ? "Ingrese el nombre" : ""}
                   disabled={jugador.confirmado && !jugador.editando}
                   fullWidth
                   sx={inputStyles}
@@ -401,6 +495,8 @@ if (seleccionCapitan) {
                   onChange={(e) =>
                     handleChangeJugador(index, "apellido", e.target.value)
                   }
+                   error={errores[index]?.apellido}
+  helperText={errores[index]?.apellido ? "Ingrese el apellido" : ""}
                   disabled={jugador.confirmado && !jugador.editando}
                   fullWidth
                   sx={inputStyles}
@@ -413,12 +509,14 @@ if (seleccionCapitan) {
                   onChange={(e) =>
                     handleChangeJugador(index, "dni", e.target.value)
                   }
+                   error={errores[index]?.dni}
+  helperText={errores[index]?.dni ? "Ingrese el DNI" : ""}
                   disabled={jugador.confirmado && !jugador.editando}
                   fullWidth
                   sx={inputStyles}
                 />
 
-              <DatePicker
+          <DatePicker
   label="Fecha de nacimiento"
   value={jugador.fechaNacimiento}
   onChange={(newValue) =>
@@ -429,9 +527,13 @@ if (seleccionCapitan) {
     textField: {
       fullWidth: true,
       sx: inputStyles,
+      error: errores[index]?.fechaNacimiento,
+      helperText: errores[index]?.fechaNacimiento
+        ? "Seleccione la fecha de nacimiento"
+        : "",
     },
   }}
-/>
+/><br />
     <TextField
                   label="Telefono de contacto"
                   type="number"
@@ -439,11 +541,47 @@ if (seleccionCapitan) {
                   onChange={(e) =>
                     handleChangeJugador(index, "telefono", e.target.value)
                   }
+                   error={errores[index]?.telefono} 
+  helperText={errores[index]?.telefono ? "Ingrese el teléfono" : ""}
                   disabled={jugador.confirmado && !jugador.editando}
                   fullWidth
                   sx={inputStyles}
                 />
+<TextField
+  label="Barrio"
+  value={jugador.barrio}
+  onChange={(e) =>
+    handleChangeJugador(index, "barrio", e.target.value)
+  }
+   error={errores[index]?.barrio}
+  disabled={jugador.confirmado && !jugador.editando}
+  fullWidth
+  inputProps={{ maxLength: 140 }}
+helperText={
+  errores[index]?.barrio
+    ? "Ingrese el barrio"
+    : `${jugador.barrio.length}/140`
+}
+  sx={inputStyles}
+/>
 
+<TextField
+  label="Dirección"
+  value={jugador.direccion}
+  onChange={(e) =>
+    handleChangeJugador(index, "direccion", e.target.value)
+  }
+    error={errores[index]?.direccion}
+  disabled={jugador.confirmado && !jugador.editando}
+  fullWidth
+  inputProps={{ maxLength: 140 }}
+  helperText={
+    errores[index]?.direccion
+      ? "Ingrese la dirección"
+      : `${jugador.direccion.length}/140`
+  }
+  sx={inputStyles}
+/>
 
                 <TextField
   label="Email"
@@ -452,6 +590,8 @@ if (seleccionCapitan) {
   onChange={(e) =>
     handleChangeJugador(index, "email", e.target.value)
   }
+   error={errores[index]?.email}
+  helperText={errores[index]?.email ? "Ingrese el email" : ""}
   disabled={jugador.confirmado && !jugador.editando}
   fullWidth
   sx={inputStyles}
@@ -490,7 +630,7 @@ if (seleccionCapitan) {
           ))}
 
           {/* FINAL */}
-    <Button
+<Button
   variant="contained"
   disabled={jugadoresConfirmados < 3 || !equipo}
   onClick={() => setSeleccionCapitan(true)}

@@ -106,6 +106,19 @@ const traerEquipos2 = async (id_torneo) => {
   return response.data;
 };
 
+
+const verificarJugador = async (dni) => {
+  console.log(dni)
+  console.log(`${baseUrl}verificarjugador`)
+  const res = await axios.post(`${baseUrl}verificarjugador`, {
+    dni,
+  });
+
+  return res.data;
+};
+
+
+
 const confirmarInvitacion = async (data) => {
   const response = await axios.post(
     `${baseUrl}confirmarInvitacion`,
@@ -115,4 +128,4 @@ const confirmarInvitacion = async (data) => {
   return response.data;
 };
 
-export default {confirmarInvitacion, traerEquipos2, guardarZonasTorneo, verificarEstadoTorneo, crearTorneosolo, traerJugadores, crearTorneo,traerEquipos, enviarequipo,traerTorneos, traerTorneo, guardarPartido, traertablas}
+export default {verificarJugador, confirmarInvitacion, traerEquipos2, guardarZonasTorneo, verificarEstadoTorneo, crearTorneosolo, traerJugadores, crearTorneo,traerEquipos, enviarequipo,traerTorneos, traerTorneo, guardarPartido, traertablas}
