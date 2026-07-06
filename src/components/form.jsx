@@ -8,7 +8,7 @@ import {
   IconButton,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-
+import banner from "../Assets/banner.jpeg";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -33,20 +33,42 @@ const [seleccionCapitan, setSeleccionCapitan] = useState(false);
 const [capitan, setCapitan] = useState(null);
 const [errores, setErrores] = useState({});
   // 🎨 estilos inputs oscuros
- const inputStyles = {
+const inputStyles = {
   "& .MuiOutlinedInput-root": {
     color: "#fff",
     backgroundColor: "#020617",
     borderRadius: 2,
-    "& fieldset": { borderColor: "#475569" },
-    "&:hover fieldset": { borderColor: "#f97316" },
-    "&.Mui-focused fieldset": { borderColor: "#22c55e" },
+
+    "& input": {
+      color: "#fff",           // texto de la fecha
+      WebkitTextFillColor: "#fff", // necesario en algunos navegadores
+    },
+
+    "& fieldset": {
+      borderColor: "#475569",
+    },
+    "&:hover fieldset": {
+      borderColor: "#f97316",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "#22c55e",
+    },
+
+    "& .MuiSvgIcon-root": {
+      color: "#fff", // ícono del calendario
+    },
   },
+
   "& .MuiInputLabel-root": {
     color: "#fff",
   },
+
   "& .MuiInputLabel-root.Mui-focused": {
     color: "#22c55e",
+  },
+
+  "& .MuiFormHelperText-root": {
+    color: "#cbd5e1",
   },
 };
 const handleChangeJugador = (index, field, value) => {
@@ -379,17 +401,26 @@ if (seleccionCapitan) {
           }}
         >
           {/* TITULO */}
-          <Typography
-            variant="h5"
-            textAlign="center"
-            sx={{
-              color: "#fff",
-              fontWeight: "bold",
-              textShadow: "0 2px 10px rgba(0,0,0,0.5)",
-            }}
-          >
-            🏀 Registro de Equipo
-          </Typography>
+       <Box
+  sx={{
+    display: "flex",
+    justifyContent: "center",
+    mb: 2,
+  }}
+>
+  <Box
+    component="img"
+    src={banner}
+    alt="Banner"
+    sx={{
+      width: "100%",
+      maxWidth: 500,
+      height: "auto",
+      borderRadius: 3,
+      boxShadow: "0 8px 25px rgba(0,0,0,.35)",
+    }}
+  />
+</Box>
 
           {/* EQUIPO */}
         <Box
@@ -516,21 +547,45 @@ if (seleccionCapitan) {
                   sx={inputStyles}
                 />
 
-          <DatePicker
+         <DatePicker
   label="Fecha de nacimiento"
   value={jugador.fechaNacimiento}
   onChange={(newValue) =>
     handleChangeJugador(index, "fechaNacimiento", newValue)
   }
+  format="DD/MM/YYYY"
   disabled={jugador.confirmado && !jugador.editando}
   slotProps={{
     textField: {
+      variant: "outlined",
       fullWidth: true,
-      sx: inputStyles,
       error: errores[index]?.fechaNacimiento,
       helperText: errores[index]?.fechaNacimiento
         ? "Seleccione la fecha de nacimiento"
         : "",
+      sx: {
+        ...inputStyles,
+        "& .MuiOutlinedInput-root": {
+          backgroundColor: "#020617",
+          color: "#fff",
+          "& input": {
+            color: "#fff",
+            WebkitTextFillColor: "#fff",
+          },
+          "& fieldset": {
+            borderColor: "#475569",
+          },
+          "&:hover fieldset": {
+            borderColor: "#f97316",
+          },
+          "&.Mui-focused fieldset": {
+            borderColor: "#22c55e",
+          },
+        },
+        "& .MuiSvgIcon-root": {
+          color: "#fff",
+        },
+      },
     },
   }}
 /><br />
