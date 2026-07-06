@@ -97,7 +97,8 @@ const erroresJugador = {
   email: !j.email,
   barrio: !j.barrio,
   direccion: !j.direccion,
-  fechaNacimiento: !j.fechaNacimiento,
+ 
+   edad: !j.edad || Number(j.edad) < 16,
 };
 
   const tieneErrores = Object.values(erroresJugador).some(Boolean);
@@ -190,11 +191,12 @@ const handleSubmit = async () => {
     nombre: j.nombre,
     apellido: j.apellido,
     dni: j.dni,
-    fechaNacimiento: j.fechaNacimiento,
+ //   fechaNacimiento: j.fechaNacimiento,
     telefono: j.telefono,
     email: j.email,
     barrio: j.barrio,
     direccion: j.direccion,
+    edad: j.edad,
   }));
 
    const payload = {
@@ -548,7 +550,7 @@ if (seleccionCapitan) {
                   sx={inputStyles}
                 />
 
-         <DatePicker
+ {/*         <DatePicker
   label="Fecha de nacimiento"
   value={jugador.fechaNacimiento}
   onChange={(newValue) =>
@@ -589,7 +591,8 @@ if (seleccionCapitan) {
       },
     },
   }}
-/><br />
+/>
+ */}
 <TextField
   label="Edad (mínimo 16 años)"
   type="number"
