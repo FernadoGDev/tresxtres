@@ -21,6 +21,7 @@ const jugadorVacio = {
   email: "",
   barrio: "",
   direccion: "",
+  edad: "",
   fechaNacimiento: null,
   confirmado: false,
   editando: false,
@@ -589,6 +590,32 @@ if (seleccionCapitan) {
     },
   }}
 /><br />
+<TextField
+  label="Edad (mínimo 16 años)"
+  type="number"
+  value={jugador.edad}
+  onChange={(e) => {
+    const valor = e.target.value;
+
+    // Solo números
+    if (/^\d*$/.test(valor)) {
+      handleChangeJugador(index, "edad", valor);
+    }
+  }}
+  error={errores[index]?.edad}
+  helperText={
+    errores[index]?.edad
+      ? "Debe tener 16 años o más"
+      : ""
+  }
+  disabled={jugador.confirmado && !jugador.editando}
+  fullWidth
+  inputProps={{
+    min: 16,
+    max: 99,
+  }}
+  sx={inputStyles}
+/>
     <TextField
                   label="Telefono de contacto"
                   type="number"
@@ -659,6 +686,17 @@ helperText={
                   <Button
                     variant="contained"
                     onClick={() => confirmarJugador(index)}
+                    disabled={
+    !jugador.nombre ||
+    !jugador.apellido ||
+    !jugador.dni ||
+    !jugador.telefono ||
+    !jugador.email ||
+    !jugador.barrio ||
+    !jugador.direccion ||
+    !jugador.edad ||
+    Number(jugador.edad) < 16
+  }
                     sx={{
                       bgcolor: "#f97316",
                       "&:hover": { bgcolor: "#ea580c" },
