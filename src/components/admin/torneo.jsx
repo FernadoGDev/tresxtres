@@ -15,7 +15,7 @@ import servicio from "../../services/servicio";
 
 export default function TorneoView() {
   const { id } = useParams();
-
+const [clasificacion, setClasificacion] = useState(0);
   const [zonas, setZonas] = useState([]);
   const [partidosPorZona, setPartidosPorZona] = useState({});
 
@@ -41,13 +41,15 @@ export default function TorneoView() {
   try {
     const response = await servicio.traerTorneo(id);
 
-    const {
-      zonas = [],
-      participaciones = [],
-      equipos = [],
-      partidos = [], // 👈 nuevo
-    } = response;
+   const {
+  clasificacion = 0,
+  zonas = [],
+  participaciones = [],
+  equipos = [],
+  partidos = [],
+} = response;
 
+setClasificacion(clasificacion);
     const equiposPlanos = equipos.flatMap((e) =>
       Array.isArray(e) ? e : [e]
     );
@@ -107,11 +109,104 @@ export default function TorneoView() {
     traerTorneo();
   }, [id]);
 
+
+const calcularTablaZona = (zona) => {
+  const tabla = {};
+
+  zona.equipos.forEach((e) => {
+    tabla[e.id] = {
+      equipo: e,
+      puntos: 0,
+      pj: 0,
+      pg: 0,
+      pe: 0,
+      pp: 0,
+      gf: 0,
+      gc: 0,
+      dg: 0,
+    };
+  });
+
+  zona.partidos.forEach((p) => {
+    if (p.goles1 === "" || p.goles2 === "") return;
+
+    const g1 = Number(p.goles1);
+    const g2 = Number(p.goles2);
+
+    const e1 = tabla[p.equipo1.id];
+    const e2 = tabla[p.equipo2.id];
+
+    e1.pj++;
+    e2.pj++;
+
+    e1.gf += g1;
+    e1.gc += g2;
+
+    e2.gf += g2;
+    e2.gc += g1;
+
+    if (g1 > g2) {
+      e1.pg++;
+      e2.pp++;
+      e1.puntos += 3;
+    } else if (g2 > g1) {
+      e2.pg++;
+      e1.pp++;
+      e2.puntos += 3;
+    } else {
+      e1.pe++;
+      e2.pe++;
+      e1.puntos++;
+      e2.puntos++;
+    }
+
+    e1.dg = e1.gf - e1.gc;
+    e2.dg = e2.gf - e2.gc;
+  });
+
+  return Object.values(tabla).sort((a, b) => {
+    if (b.puntos !== a.puntos) return b.puntos - a.puntos;
+    if (b.dg !== a.dg) return b.dg - a.dg;
+    return b.gf - a.gf;
+  });
+};
+
+
+const primeros = [];
+const segundos = [];
+
+zonas.forEach((zona) => {
+  const tabla = calcularTablaZona(zona);
+
+  if (tabla[0]) primeros.push(tabla[0]);
+  if (tabla[1]) segundos.push(tabla[1]);
+});
+
+segundos.sort((a, b) => {
+  if (b.puntos !== a.puntos) return b.puntos - a.puntos;
+  if (b.dg !== a.dg) return b.dg - a.dg;
+  return b.gf - a.gf;
+});
+
+const clasificados = new Set();
+
+// pasan todos los primeros
+primeros.forEach((p) => clasificados.add(p.equipo.id));
+
+// cupos restantes
+const restantes = clasificacion - primeros.length;
+
+if (restantes > 0) {
+  segundos.slice(0, restantes).forEach((s) => {
+    clasificados.add(s.equipo.id);
+  });
+}
+
+
   return (
     <Box p={3}>
-      <Typography variant="h4" mb={3}>
-        Zonas del torneo
-      </Typography>
+  
+  
 <Box
   display="flex"
   justifyContent="space-between"
@@ -162,8 +257,18 @@ export default function TorneoView() {
               <TableBody>
                 {zona.equipos?.length > 0 ? (
                   zona.equipos.map((equipo, index) => (
-                    <TableRow key={equipo?.id || index}>
-                      <TableCell>
+                    <TableRow key={equipo?.id || index}  sx={{
+    backgroundColor: clasificados.has(equipo.id)
+      ? "#c8e6c9"
+      : "inherit",
+    fontWeight: clasificados.has(equipo.id)
+      ? "bold"
+      : "normal",
+  }}>
+                      <TableCell  sx={{
+    fontWeight: clasificados.has(equipo.id) ? "bold" : "normal",
+    color: clasificados.has(equipo.id) ? "green" : "inherit",
+  }}>
                         {equipo?.nombre || "Sin nombre"}
                       </TableCell>
                     </TableRow>
