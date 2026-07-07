@@ -98,6 +98,11 @@ const guardarZonasTorneo = async (zonas) => {
 };
 
 
+const guardarClasificacion = async (zonas) => {
+  const { data } = await axios.post(`${baseUrl}guardarClasificacion`,  zonas );
+  return data;
+};
+
 const traerEquipos2 = async (id_torneo) => {
   const response = await axios.get(
     `${baseUrl}traerEquipos2/${id_torneo}`
@@ -128,4 +133,4 @@ const confirmarInvitacion = async (data) => {
   return response.data;
 };
 
-export default {verificarJugador, confirmarInvitacion, traerEquipos2, guardarZonasTorneo, verificarEstadoTorneo, crearTorneosolo, traerJugadores, crearTorneo,traerEquipos, enviarequipo,traerTorneos, traerTorneo, guardarPartido, traertablas}
+export default {guardarClasificacion, verificarJugador, confirmarInvitacion, traerEquipos2, guardarZonasTorneo, verificarEstadoTorneo, crearTorneosolo, traerJugadores, crearTorneo,traerEquipos, enviarequipo,traerTorneos, traerTorneo, guardarPartido, traertablas}

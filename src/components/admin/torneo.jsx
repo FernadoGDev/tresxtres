@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import servicio from "../../services/servicio";
-
+import { TextField } from "@mui/material";
 export default function TorneoView() {
   const { id } = useParams();
 const [clasificacion, setClasificacion] = useState(0);
@@ -37,6 +37,107 @@ const [clasificacion, setClasificacion] = useState(0);
     return partidos;
   };
 
+
+const generarPlayoff = async () => {
+
+  const posiciones = [];
+
+  zonas.forEach((zona) => {
+
+    const tabla = calcularTablaZona(zona);
+
+    tabla.forEach((fila, index) => {
+
+      posiciones.push({
+        puesto: index + 1,
+        zona: zona.id,
+        equipo: fila.equipo,
+        puntos: fila.puntos,
+        dg: fila.dg,
+        gf: fila.gf,
+      });
+
+    });
+
+  });
+
+  // Ordena:
+  // primero todos los primeros,
+  // luego todos los segundos,
+  // luego todos los terceros...
+  posiciones.sort((a, b) => {
+
+    if (a.puesto !== b.puesto)
+      return a.puesto - b.puesto;
+
+    if (b.puntos !== a.puntos)
+      return b.puntos - a.puntos;
+
+    if (b.dg !== a.dg)
+      return b.dg - a.dg;
+
+    return b.gf - a.gf;
+
+  });
+
+  const clasificados = posiciones.slice(0, clasificacion);
+
+  const cruces = [];
+
+  let izquierda = 0;
+  let derecha = clasificados.length - 1;
+
+  while (izquierda < derecha) {
+
+    cruces.push({
+
+      local: clasificados[izquierda].equipo.id,
+      visitante: clasificados[derecha].equipo.id,
+
+      nombre_local: clasificados[izquierda].equipo.nombre,
+      nombre_visitante: clasificados[derecha].equipo.nombre,
+
+      siembra_local: izquierda + 1,
+      siembra_visitante: derecha + 1,
+
+    });
+
+    izquierda++;
+    derecha--;
+
+  }
+
+  let libre = null;
+
+  if (clasificados.length % 2 !== 0) {
+    libre = clasificados[Math.floor(clasificados.length / 2)];
+  }
+
+  console.log("Clasificados");
+  console.table(clasificados);
+
+  console.log("Cruces");
+  console.table(cruces);
+
+  if (libre) {
+    console.log("Libre:", libre.equipo.nombre);
+  }
+
+  await servicio.generarPlayoff({
+
+    id_torneo: id,
+
+    clasificados,
+
+    cruces,
+
+    libre,
+
+  });
+
+  alert("Playoff generado");
+
+};
   const traerTorneo = async () => {
   try {
     const response = await servicio.traerTorneo(id);
@@ -100,6 +201,13 @@ setClasificacion(clasificacion);
     });
 
     setZonas(zonasConEquipos);
+    const partidosActualizados = {};
+
+zonasConEquipos.forEach((z) => {
+  partidosActualizados[z.id] = z.partidos;
+});
+
+setPartidosPorZona(partidosActualizados);
   } catch (error) {
     console.error(error);
   }
@@ -171,36 +279,53 @@ const calcularTablaZona = (zona) => {
   });
 };
 
+const obtenerClasificados = () => {
 
-const primeros = [];
-const segundos = [];
+  const posiciones = [];
 
-zonas.forEach((zona) => {
-  const tabla = calcularTablaZona(zona);
+  zonas.forEach((zona) => {
 
-  if (tabla[0]) primeros.push(tabla[0]);
-  if (tabla[1]) segundos.push(tabla[1]);
-});
+    const tabla = calcularTablaZona(zona);
 
-segundos.sort((a, b) => {
-  if (b.puntos !== a.puntos) return b.puntos - a.puntos;
-  if (b.dg !== a.dg) return b.dg - a.dg;
-  return b.gf - a.gf;
-});
+    tabla.forEach((fila, index) => {
 
-const clasificados = new Set();
+      posiciones.push({
+        puesto: index + 1,
+        equipo: fila.equipo,
+        puntos: fila.puntos,
+        dg: fila.dg,
+        gf: fila.gf,
+      });
 
-// pasan todos los primeros
-primeros.forEach((p) => clasificados.add(p.equipo.id));
+    });
 
-// cupos restantes
-const restantes = clasificacion - primeros.length;
-
-if (restantes > 0) {
-  segundos.slice(0, restantes).forEach((s) => {
-    clasificados.add(s.equipo.id);
   });
-}
+
+  posiciones.sort((a, b) => {
+
+    if (a.puesto !== b.puesto)
+      return a.puesto - b.puesto;
+
+    if (b.puntos !== a.puntos)
+      return b.puntos - a.puntos;
+
+    if (b.dg !== a.dg)
+      return b.dg - a.dg;
+
+    return b.gf - a.gf;
+
+  });
+
+  return new Set(
+    posiciones
+      .slice(0, clasificacion)
+      .map((x) => x.equipo.id)
+  );
+
+};
+
+const clasificados = obtenerClasificados();
+
 
 
   return (
@@ -216,7 +341,41 @@ if (restantes > 0) {
   <Typography variant="h4">
     Zonas del torneo
   </Typography>
+<Box display="flex" gap={2} alignItems="center">
 
+<TextField
+    label="Clasifican"
+    type="number"
+    value={clasificacion}
+    onChange={(e)=>setClasificacion(Number(e.target.value))}
+    sx={{width:120}}
+/>
+
+<Button
+    variant="contained"
+    onClick={async()=>{
+
+        await servicio.guardarClasificacion({
+            id_torneo:id,
+            clasificacion
+        });
+
+        alert("Cantidad guardada");
+
+    }}
+>
+Guardar
+</Button>
+
+<Button
+    variant="contained"
+    color="success"
+    onClick={generarPlayoff}
+>
+Clasificar
+</Button>
+
+</Box>
   <Button
     variant="contained"
     color="success"
@@ -228,58 +387,91 @@ if (restantes > 0) {
   </Button>
 </Box>
       <Box display="flex" flexWrap="wrap" gap={3}>
-        {zonas.map((zona) => (
-         <Paper
-  key={zona.id}
-  sx={{
-    p: 3,
-    minWidth: 350,
-    borderRadius: 3,
-    boxShadow: 3,
-    transition: "0.2s",
-    "&:hover": {
-      boxShadow: 6,
-    },
-  }}
->
+ {zonas.map((zona) => {
+
+const tablaZona = calcularTablaZona({
+  ...zona,
+  partidos: partidosPorZona[zona.id] || zona.partidos,
+});
+
+
+  return (
+
+    <Paper
+      key={zona.id}
+      sx={{
+        p: 3,
+        minWidth: 350,
+        borderRadius: 3,
+        boxShadow: 3,
+        transition: "0.2s",
+        "&:hover": {
+          boxShadow: 6,
+        },
+      }}
+    >
             <Typography variant="h6" mb={2}>
               {zona.nombre || `Zona ${zona.id}`}
             </Typography>
 
             {/* TABLA DE EQUIPOS */}
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Equipo</TableCell>
-                </TableRow>
-              </TableHead>
+           <Table size="small">
+    <TableHead>
+        <TableRow>
+            <TableCell>#</TableCell>
+            <TableCell>Equipo</TableCell>
+            <TableCell align="center">Pts</TableCell>
+            <TableCell align="center">PJ</TableCell>
+            <TableCell align="center">PG</TableCell>
+            <TableCell align="center">PE</TableCell>
+            <TableCell align="center">PP</TableCell>
+            <TableCell align="center">GF</TableCell>
+            <TableCell align="center">GC</TableCell>
+            <TableCell align="center">DG</TableCell>
+        </TableRow>
+    </TableHead>
 
-              <TableBody>
-                {zona.equipos?.length > 0 ? (
-                  zona.equipos.map((equipo, index) => (
-                    <TableRow key={equipo?.id || index}  sx={{
-    backgroundColor: clasificados.has(equipo.id)
-      ? "#c8e6c9"
-      : "inherit",
-    fontWeight: clasificados.has(equipo.id)
-      ? "bold"
-      : "normal",
-  }}>
-                      <TableCell  sx={{
-    fontWeight: clasificados.has(equipo.id) ? "bold" : "normal",
-    color: clasificados.has(equipo.id) ? "green" : "inherit",
-  }}>
-                        {equipo?.nombre || "Sin nombre"}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell>Sin equipos</TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+    <TableBody>
+
+        {tablaZona.map((fila, index)=>(
+
+            <TableRow
+                key={fila.equipo.id}
+                sx={{
+                    backgroundColor: clasificados.has(fila.equipo.id)
+                        ? "#c8e6c9"
+                        : "inherit"
+                }}
+            >
+
+                <TableCell>{index+1}</TableCell>
+
+                <TableCell
+                    sx={{
+                        fontWeight: clasificados.has(fila.equipo.id)
+                            ? "bold"
+                            : "normal"
+                    }}
+                >
+                    {fila.equipo.nombre}
+                </TableCell>
+
+                <TableCell align="center">{fila.puntos}</TableCell>
+                <TableCell align="center">{fila.pj}</TableCell>
+                <TableCell align="center">{fila.pg}</TableCell>
+                <TableCell align="center">{fila.pe}</TableCell>
+                <TableCell align="center">{fila.pp}</TableCell>
+                <TableCell align="center">{fila.gf}</TableCell>
+                <TableCell align="center">{fila.gc}</TableCell>
+                <TableCell align="center">{fila.dg}</TableCell>
+
+            </TableRow>
+
+        ))}
+
+    </TableBody>
+
+</Table>
 
             {/* BOTÓN GENERAR PARTIDOS */}
             <Box mt={2}>
@@ -403,7 +595,8 @@ if (restantes > 0) {
           };
 
           await servicio.guardarPartido(payload);
-          alert("Guardado");
+        await traerTorneo();
+alert("Guardado");
         }}
       >
         💾
@@ -412,7 +605,10 @@ if (restantes > 0) {
   ))}
 </Box>
           </Paper>
-        ))}
+
+  );
+
+})}
       </Box>
     </Box>
   );
