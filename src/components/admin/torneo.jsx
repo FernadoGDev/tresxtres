@@ -8,11 +8,17 @@ import {
   TableRow,
   TableCell,
   TableBody,
-  Button
+  Button,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import servicio from "../../services/servicio";
-import { TextField } from "@mui/material";
+import PlayoffView from "./playoffs";
+
 export default function TorneoView() {
   const { id } = useParams();
 const [clasificacion, setClasificacion] = useState(0);
@@ -343,13 +349,16 @@ const clasificados = obtenerClasificados();
   </Typography>
 <Box display="flex" gap={2} alignItems="center">
 
-<TextField
-    label="Clasifican"
-    type="number"
+<Select
     value={clasificacion}
-    onChange={(e)=>setClasificacion(Number(e.target.value))}
-    sx={{width:120}}
-/>
+    onChange={(e) => setClasificacion(Number(e.target.value))}
+>
+    <MenuItem value={2}>2</MenuItem>
+    <MenuItem value={4}>4</MenuItem>
+    <MenuItem value={8}>8</MenuItem>
+    <MenuItem value={16}>16</MenuItem>
+    <MenuItem value={32}>32</MenuItem>
+</Select>
 
 <Button
     variant="contained"
@@ -610,6 +619,7 @@ alert("Guardado");
 
 })}
       </Box>
+      <PlayoffView id_torneo={id} />
     </Box>
   );
 }

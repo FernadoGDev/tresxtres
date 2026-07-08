@@ -112,6 +112,22 @@ const traerEquipos2 = async (id_torneo) => {
 };
 
 
+const traerplayoffs = async (id_torneo) => {
+  const response = await axios.get(
+    `${baseUrl}traerplayoffs/${id_torneo}`
+  );
+
+  return response.data;
+};
+const guardarresultadoPlayoff = async (datos) => {
+  const res = await axios.post(
+    `${baseUrl}/resultadoPlayoff`,
+    datos
+  );
+
+  return res.data;
+}
+
 const verificarJugador = async (dni) => {
   console.log(dni)
   console.log(`${baseUrl}verificarjugador`)
@@ -133,4 +149,16 @@ const confirmarInvitacion = async (data) => {
   return response.data;
 };
 
-export default {guardarClasificacion, verificarJugador, confirmarInvitacion, traerEquipos2, guardarZonasTorneo, verificarEstadoTorneo, crearTorneosolo, traerJugadores, crearTorneo,traerEquipos, enviarequipo,traerTorneos, traerTorneo, guardarPartido, traertablas}
+
+const generarPlayoff = async (data) => {
+  const response = await axios.post(
+    `${baseUrl}generarPlayoff`,
+    data
+  );
+
+  return response.data;
+};
+
+
+
+export default {guardarresultadoPlayoff, traerplayoffs, generarPlayoff, guardarClasificacion, verificarJugador, confirmarInvitacion, traerEquipos2, guardarZonasTorneo, verificarEstadoTorneo, crearTorneosolo, traerJugadores, crearTorneo,traerEquipos, enviarequipo,traerTorneos, traerTorneo, guardarPartido, traertablas}
