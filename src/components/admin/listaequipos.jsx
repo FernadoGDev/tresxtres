@@ -57,9 +57,13 @@ export default function EquiposAdmin() {
             <Table component={Paper}>
               <TableHead>
                 <TableRow>
-                  <TableCell>#</TableCell>
+                
+                   <TableCell>Dni</TableCell>
                   <TableCell>Nombre</TableCell>
-                  <TableCell>Acciones</TableCell>
+ <TableCell>Telefono</TableCell>
+                  <TableCell>Direccion</TableCell>
+                  <TableCell>Edad</TableCell>
+                    <TableCell>Barrio</TableCell>
                 </TableRow>
               </TableHead>
 
@@ -67,14 +71,12 @@ export default function EquiposAdmin() {
                 {equipo.jugadores && equipo.jugadores.length > 0 ? (
                   equipo.jugadores.map((jugador) => (
                     <TableRow key={jugador.id}>
-                      <TableCell>{jugador.numero || "-"}</TableCell>
-                      <TableCell>{jugador.nombre}</TableCell>
-                      <TableCell>
-                        <Button size="small">Editar</Button>
-                        <Button size="small" color="error">
-                          Eliminar
-                        </Button>
-                      </TableCell>
+                      <TableCell> {jugador.dni || "-"}</TableCell>
+                      <TableCell>{jugador.apellido}  {jugador.nombre || "-"}</TableCell>
+                      <TableCell>{jugador.telefono || "-"}</TableCell>
+                      <TableCell>{jugador.direccion || "-"}</TableCell>
+                      <TableCell>{jugador.edad || "-"}</TableCell>
+                 <TableCell>{jugador.barrio || "-"}</TableCell>
                     </TableRow>
                   ))
                 ) : (
