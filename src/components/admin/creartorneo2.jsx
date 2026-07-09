@@ -370,7 +370,7 @@ const confirmarInvitacion = async (idEquipo) => {
             gap={1}
             flexWrap="wrap"
           >
-            {[2, 3, 4, 5, 6, 7, 8].map(
+            {[1,2, 3, 4, 5, 6, 7, 8].map(
               (n) => (
                 <Button
                   key={n}

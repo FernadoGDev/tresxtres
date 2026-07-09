@@ -31,7 +31,7 @@ export default function PlayoffView(props) {
 
     try {
 console.log("Cargando playoffs para el torneo:", id_torneo);
-console.log(props.id_torneo)
+
       const res = await servicio.traerplayoffs(props.id_torneo || id_torneo);
 
       setPartidos(res);
@@ -96,7 +96,25 @@ console.log(props.id_torneo)
 
   }
 
+const borrarPlayoffs = async () => {
+  const confirmar = window.confirm(
+    "¿Seguro que desea borrar todos los playoffs de este torneo?"
+  );
 
+  if (!confirmar) return;
+
+  try {
+    await servicio.borrarPlayoffs(
+      props.id_torneo || id_torneo
+    );
+
+    setPartidos([]);
+    alert("Playoffs eliminados correctamente.");
+  } catch (error) {
+    console.log(error);
+    alert("Error al eliminar los playoffs.");
+  }
+};
 
   return (
 
@@ -120,7 +138,17 @@ fontWeight:"bold"
 🏆 Playoffs Torneo {id_torneo}
 </Typography>
 
-
+<Button
+  variant="contained"
+  color="error"
+  sx={{
+    mb: 4,
+    fontWeight: "bold"
+  }}
+  onClick={borrarPlayoffs}
+>
+  🗑️ Borrar Playoffs
+</Button>
 
 <Box
 sx={{

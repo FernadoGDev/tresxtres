@@ -59,6 +59,10 @@ const crearTorneo = (data) => {
   return axios.post(baseUrl + "torneos", data);
 };
 
+const borrarPlayoffs  = (data) => {
+ 
+  return axios.post(baseUrl + "borrarPlayoffs", {id_torneo: data});
+};
 
 
 
@@ -161,4 +165,4 @@ const generarPlayoff = async (data) => {
 
 
 
-export default {guardarresultadoPlayoff, traerplayoffs, generarPlayoff, guardarClasificacion, verificarJugador, confirmarInvitacion, traerEquipos2, guardarZonasTorneo, verificarEstadoTorneo, crearTorneosolo, traerJugadores, crearTorneo,traerEquipos, enviarequipo,traerTorneos, traerTorneo, guardarPartido, traertablas}
+export default {borrarPlayoffs, guardarresultadoPlayoff, traerplayoffs, generarPlayoff, guardarClasificacion, verificarJugador, confirmarInvitacion, traerEquipos2, guardarZonasTorneo, verificarEstadoTorneo, crearTorneosolo, traerJugadores, crearTorneo,traerEquipos, enviarequipo,traerTorneos, traerTorneo, guardarPartido, traertablas}
