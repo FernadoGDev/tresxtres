@@ -9,7 +9,9 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { Button } from "@mui/material";
 import servicio from "../../services/servicio";
 
 export default function JugadoresAdmin() {
@@ -30,12 +32,53 @@ export default function JugadoresAdmin() {
   useEffect(() => {
     traerJugadores();
   }, []);
+const descargarExcel = () => {
+  const datos = jugadores.map((j) => ({
+    "Nombre y Apellido": `${j.nombre} ${j.apellido}`,
+    DNI: j.dni || "",
+    Telefono: j.telefono || "",
+    Direccion: j.direccion || "",
+    Equipo: j.equipo || "",
+    Capitan: Number(j.capitan) === 1 ? "Sí" : "No",
+  }));
 
+  const ws = XLSX.utils.json_to_sheet(datos);
+  const wb = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(wb, ws, "Jugadores");
+
+  const excelBuffer = XLSX.write(wb, {
+    bookType: "xlsx",
+    type: "array",
+  });
+
+  const fileData = new Blob([excelBuffer], {
+    type:
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  saveAs(fileData, "jugadores.xlsx");
+};
   return (
     <Box p={3}>
-      <Typography variant="h4" mb={2}>
-        Lista de Jugadores
-      </Typography>
+   <Box
+  mb={2}
+  display="flex"
+  justifyContent="space-between"
+  alignItems="center"
+>
+  <Typography variant="h4">
+    Lista de Jugadores
+  </Typography>
+
+  <Button
+    variant="contained"
+    color="success"
+    onClick={descargarExcel}
+  >
+    Descargar Excel
+  </Button>
+</Box>
 
       <Table component={Paper}>
         <TableHead>
@@ -47,7 +90,12 @@ export default function JugadoresAdmin() {
             <TableCell>
               <b>DNI</b>
             </TableCell>
-
+   <TableCell>
+              <b>Telefono</b>
+            </TableCell>
+               <TableCell>
+              <b>Direccion</b>
+            </TableCell>
             <TableCell>
               <b>Equipo</b>
             </TableCell>
@@ -69,7 +117,12 @@ export default function JugadoresAdmin() {
                 <TableCell>
                   {jugador.dni || "-"}
                 </TableCell>
-
+<TableCell>
+                  {jugador.telefono || "-"}
+                </TableCell>
+                <TableCell>
+                  {jugador.direccion || "-"}
+                </TableCell>
                 <TableCell>
                   {jugador.equipo || "-"}
                 </TableCell>
