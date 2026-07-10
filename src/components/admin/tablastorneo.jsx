@@ -17,11 +17,15 @@ export default function TablasTorneo() {
   const [zonas, setZonas] = useState([]);
 
 const [ultimo, setUltimo] = useState(null);
-
+const [clasificacion, setClasificacion] =
+  useState(0);
 
 const traerTablas = async () => {
   try {
     const res = await servicio.traertablas(id);
+    setClasificacion(
+  Number(res.clasificacion || 0)
+);
 
     setZonas(res.zonas);
     setUltimo(res.ultimoPartido);
@@ -42,6 +46,60 @@ useEffect(() => {
 
   return () => clearInterval(interval); // limpieza
 }, [id]);
+
+
+const tablaGeneral = [];
+
+zonas.forEach((zona) => {
+  zona.tabla.forEach((e, index) => {
+    tablaGeneral.push({
+      puesto: index + 1,
+      equipo: e.equipo,
+      puntos: e.puntos,
+      dg: e.diferencia,
+      gf: e.goles_favor,
+    });
+  });
+});
+
+tablaGeneral.sort((a, b) => {
+  if (a.puesto !== b.puesto)
+    return a.puesto - b.puesto;
+
+  if (b.puntos !== a.puntos)
+    return b.puntos - a.puntos;
+
+  if (b.dg !== a.dg)
+    return b.dg - a.dg;
+
+  return b.gf - a.gf;
+});
+
+
+
+
+
+const clasificadosGeneral =
+  tablaGeneral.slice(0, clasificacion);
+
+const cruces = [];
+
+let i = 0;
+let j =
+  clasificadosGeneral.length - 1;
+
+while (i < j) {
+  cruces.push({
+    local: clasificadosGeneral[i],
+    visitante:
+      clasificadosGeneral[j],
+  });
+
+  i++;
+  j--;
+}
+
+
   return (
     <>
     {ultimo && (
@@ -174,10 +232,114 @@ useEffect(() => {
               Sin partidos cargados
             </Typography>
           )}
+          
         </Box>
       </Paper>
     ))}
   </Box>
+  <Paper
+  sx={{
+    p: 2,
+    width: {
+      xs: "100%",
+      md: 350,
+    },
+    flexShrink: 0,
+    borderRadius: 3,
+    boxShadow: 3,
+  }}
+>
+  <Typography
+    variant="h6"
+    mb={2}
+    textAlign="center"
+  >
+    🏆 Clasificación General
+  </Typography>
+
+  <Table size="small">
+    <TableHead>
+      <TableRow>
+        <TableCell>#</TableCell>
+        <TableCell>Equipo</TableCell>
+        <TableCell align="center">
+          Pts
+        </TableCell>
+      </TableRow>
+    </TableHead>
+
+<TableBody>
+  {tablaGeneral.map((e, index) => (
+    <TableRow
+      key={index}
+      sx={{
+        background:
+          index < clasificacion
+            ? "#c8e6c9"
+            : "inherit",
+      }}
+    >
+      <TableCell>
+        {index + 1}
+      </TableCell>
+
+      <TableCell>
+        {e.equipo}
+      </TableCell>
+
+      <TableCell align="center">
+        {e.puntos}
+      </TableCell>
+    </TableRow>
+  ))}
+</TableBody>
+  </Table>
+
+  <Typography
+    variant="h6"
+    mt={3}
+    mb={2}
+    textAlign="center"
+  >
+    ⚔️ Cruces al momento
+  </Typography>
+
+  {cruces.map((c, index) => (
+    <Box
+      key={index}
+      sx={{
+        p: 1.5,
+        mb: 1,
+        borderRadius: 2,
+        background:
+          "linear-gradient(90deg,#0f172a,#1e293b)",
+        color: "#fff",
+      }}
+    >
+      <Typography
+        align="center"
+        fontWeight="bold"
+      >
+        {index + 1}° {c.local.equipo}
+      </Typography>
+
+      <Typography
+        align="center"
+        sx={{ opacity: 0.7 }}
+      >
+        VS
+      </Typography>
+
+      <Typography
+        align="center"
+        fontWeight="bold"
+      >
+        {tablaGeneral.length - index}°{" "}
+        {c.visitante.equipo}
+      </Typography>
+    </Box>
+  ))}
+</Paper>
 </Box>
 
 </>

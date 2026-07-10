@@ -331,7 +331,57 @@ const obtenerClasificados = () => {
 };
 
 const clasificados = obtenerClasificados();
+const tablaGeneral = [];
 
+zonas.forEach((zona) => {
+  const tabla = calcularTablaZona({
+    ...zona,
+    partidos: partidosPorZona[zona.id] || zona.partidos,
+  });
+
+  tabla.forEach((fila, index) => {
+    tablaGeneral.push({
+      puesto: index + 1,
+      equipo: fila.equipo,
+      puntos: fila.puntos,
+      dg: fila.dg,
+      gf: fila.gf,
+    });
+  });
+});
+
+tablaGeneral.sort((a, b) => {
+  if (a.puesto !== b.puesto)
+    return a.puesto - b.puesto;
+
+  if (b.puntos !== a.puntos)
+    return b.puntos - a.puntos;
+
+  if (b.dg !== a.dg)
+    return b.dg - a.dg;
+
+  return b.gf - a.gf;
+});
+
+const clasificadosGeneral =
+  tablaGeneral.slice(0, clasificacion);
+
+const crucesGeneral = [];
+
+let izquierda = 0;
+let derecha =
+  clasificadosGeneral.length - 1;
+
+while (izquierda < derecha) {
+  crucesGeneral.push({
+    local: clasificadosGeneral[izquierda],
+    visitante:
+      clasificadosGeneral[derecha],
+  });
+
+  izquierda++;
+  derecha--;
+}
 
 
   return (
@@ -395,7 +445,123 @@ Clasificar
     Ver tablas
   </Button>
 </Box>
-      <Box display="flex" flexWrap="wrap" gap={3}>
+  <Box
+  display="flex"
+  gap={3}
+  alignItems="flex-start"
+>
+  <Paper
+  sx={{
+    width: 380,
+    p: 3,
+    borderRadius: 3,
+    boxShadow: 3,
+    position: "sticky",
+    top: 20,
+  }}
+>
+  <Typography variant="h6" mb={2}>
+    Clasificación General
+  </Typography>
+
+  <Table size="small">
+    <TableHead>
+      <TableRow>
+        <TableCell>#</TableCell>
+        <TableCell>Equipo</TableCell>
+        <TableCell align="center">
+          Pts
+        </TableCell>
+      </TableRow>
+    </TableHead>
+
+    <TableBody>
+      {clasificadosGeneral.map(
+        (e, index) => (
+          <TableRow
+            key={e.equipo.id}
+            sx={{
+              background:
+                index % 2 === 0
+                  ? "#f8f9fa"
+                  : "#fff",
+            }}
+          >
+            <TableCell>
+              {index + 1}
+            </TableCell>
+
+            <TableCell
+              sx={{
+                fontWeight: "bold",
+              }}
+            >
+              {e.equipo.nombre}
+            </TableCell>
+
+            <TableCell align="center">
+              {e.puntos}
+            </TableCell>
+          </TableRow>
+        )
+      )}
+    </TableBody>
+  </Table>
+
+  <Typography
+    variant="h6"
+    mt={4}
+    mb={2}
+  >
+    Cruces
+  </Typography>
+
+  {crucesGeneral.map((c, index) => (
+    <Paper
+      key={index}
+      sx={{
+        p: 1.5,
+        mb: 1,
+        background:
+          "linear-gradient(90deg,#0f172a,#1e293b)",
+        color: "#fff",
+        borderRadius: 2,
+      }}
+    >
+      <Typography
+        fontWeight="bold"
+        textAlign="center"
+      >
+        {index + 1}°
+        {" "}
+        {c.local.equipo.nombre}
+      </Typography>
+
+      <Typography
+        textAlign="center"
+        sx={{
+          opacity: 0.7,
+          my: 0.5,
+        }}
+      >
+        VS
+      </Typography>
+
+      <Typography
+        fontWeight="bold"
+        textAlign="center"
+      >
+        {
+          clasificadosGeneral.length -
+          index
+        }
+        °
+        {" "}
+        {c.visitante.equipo.nombre}
+      </Typography>
+    </Paper>
+  ))}
+</Paper>
  {zonas.map((zona) => {
 
 const tablaZona = calcularTablaZona({
