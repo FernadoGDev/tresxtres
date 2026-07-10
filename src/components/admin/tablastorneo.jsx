@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import servicio from "../../services/servicio";
-
+import Playoffs from "./playoffspublico";
 export default function TablasTorneo() {
   const { id } = useParams();
   const [zonas, setZonas] = useState([]);
@@ -340,6 +340,7 @@ while (i < j) {
     </Box>
   ))}
 </Paper>
+ <Playoffs id_torneo={id} />
 </Box>
 
 </>

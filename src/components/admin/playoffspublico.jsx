@@ -43,7 +43,9 @@ export default function PlayoffView(props) {
     partidos.filter(
       (p) => p.instancia === nombre
     );
-
+if (!partidos.length) {
+  return null;
+}
   return (
     <Box
       sx={{
