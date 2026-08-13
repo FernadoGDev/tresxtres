@@ -41,27 +41,49 @@ const inputStyles = {
     borderRadius: 2,
 
     "& input": {
-      color: "#fff",           // texto de la fecha
-      WebkitTextFillColor: "#fff", // necesario en algunos navegadores
+      color: "#fff",
+      WebkitTextFillColor: "#fff",
+    },
+
+    "& input.Mui-disabled": {
+      color: "#fff",
+      WebkitTextFillColor: "#fff",
+      opacity: 1,
     },
 
     "& fieldset": {
       borderColor: "#475569",
     },
+
     "&:hover fieldset": {
       borderColor: "#f97316",
     },
+
     "&.Mui-focused fieldset": {
       borderColor: "#22c55e",
     },
 
+    "&.Mui-disabled": {
+      color: "#fff",
+      backgroundColor: "#020617",
+    },
+
+    "&.Mui-disabled fieldset": {
+      borderColor: "#475569",
+    },
+
     "& .MuiSvgIcon-root": {
-      color: "#fff", // ícono del calendario
+      color: "#fff",
     },
   },
 
   "& .MuiInputLabel-root": {
     color: "#fff",
+  },
+
+  "& .MuiInputLabel-root.Mui-disabled": {
+    color: "#fff",
+    opacity: 1,
   },
 
   "& .MuiInputLabel-root.Mui-focused": {
@@ -70,6 +92,11 @@ const inputStyles = {
 
   "& .MuiFormHelperText-root": {
     color: "#cbd5e1",
+  },
+
+  "& .MuiFormHelperText-root.Mui-disabled": {
+    color: "#cbd5e1",
+    opacity: 1,
   },
 };
 const handleChangeJugador = (index, field, value) => {
@@ -388,17 +415,40 @@ if (seleccionCapitan) {
             "50%": { transform: "scale(1.1)", opacity: 0.7 },
             "100%": { transform: "scale(1)", opacity: 1 },
           },
+          "@keyframes slideUp": {
+  from: {
+    opacity: 0,
+    transform: "translate(-50%, 30px)",
+  },
+  to: {
+    opacity: 1,
+    transform: "translate(-50%, 0)",
+  },
+},
+
+"@keyframes pulseButton": {
+  "0%": {
+    transform: "scale(1)",
+  },
+  "50%": {
+    transform: "scale(1.03)",
+  },
+  "100%": {
+    transform: "scale(1)",
+  },
+},
         }}
       >
-        <Box
-          sx={{
-            maxWidth: 500,
-            mx: "auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-          }}
-        >
+     <Box
+  sx={{
+    maxWidth: 500,
+    mx: "auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+    pb: 14, // espacio para que el botón flotante no tape el último jugador
+  }}
+>
           {/* TITULO */}
        <Box
   sx={{
@@ -440,7 +490,60 @@ if (seleccionCapitan) {
     sx={inputStyles}
   />
 </Box>
+<Box
+  sx={{
+    position: "fixed",
+    top: 20,
+    right: 20,
+    zIndex: 1500,
+    background: "rgba(15, 23, 42, 0.95)",
+    backdropFilter: "blur(8px)",
+    borderRadius: 3,
+    px: 2,
+    py: 1.2,
+    boxShadow: "0 6px 20px rgba(0,0,0,0.35)",
+    border: "1px solid rgba(255,255,255,0.15)",
+    animation: "fadeIn 0.4s ease",
+  }}
+>
+  <Typography
+    sx={{
+      color: "#fff",
+      fontWeight: "bold",
+      fontSize: "0.95rem",
+      textAlign: "center",
+    }}
+  >
+    👥 Jugadores
+  </Typography>
 
+  <Typography
+    sx={{
+      color:
+        jugadoresConfirmados >= 3
+          ? "#22c55e"
+          : "#f97316",
+      fontWeight: "bold",
+      fontSize: "1.4rem",
+      textAlign: "center",
+      lineHeight: 1.2,
+    }}
+  >
+    {jugadoresConfirmados}/5
+  </Typography>
+
+  <Typography
+    sx={{
+      color: "#cbd5e1",
+      fontSize: "0.7rem",
+      textAlign: "center",
+    }}
+  >
+    {jugadoresConfirmados >= 3
+      ? "Equipo listo"
+      : `Faltan ${3 - jugadoresConfirmados}`}
+  </Typography>
+</Box>
           {/* JUGADORES */}
           {jugadores.map((jugador, index) => (
             <Paper
@@ -728,13 +831,42 @@ helperText={
           ))}
 
           {/* FINAL */}
-<Button
-  variant="contained"
-  disabled={jugadoresConfirmados < 3 || !equipo}
-  onClick={() => setSeleccionCapitan(true)}
->
-  Finalizar equipo ({jugadoresConfirmados}/5)
-</Button>
+{jugadoresConfirmados >= 3 && equipo && (
+  <Box
+    sx={{
+      position: "fixed",
+      bottom: 20,
+      left: "50%",
+      transform: "translateX(-50%)",
+      zIndex: 2000,
+      width: "calc(100% - 32px)",
+      maxWidth: 500,
+      animation: "slideUp 0.4s ease",
+    }}
+  >
+    <Button
+      fullWidth
+      variant="contained"
+      onClick={() => setSeleccionCapitan(true)}
+      sx={{
+        py: 1.8,
+        borderRadius: 4,
+        fontSize: "1.1rem",
+        fontWeight: "bold",
+        background: "linear-gradient(90deg, #f97316, #ea580c)",
+        boxShadow: "0 8px 30px rgba(0,0,0,0.45)",
+
+        "&:hover": {
+          background: "linear-gradient(90deg, #ea580c, #c2410c)",
+        },
+
+        animation: "pulseButton 2s infinite",
+      }}
+    >
+      🏀 Finalizar equipo · {jugadoresConfirmados}/5
+    </Button>
+  </Box>
+)}
         </Box>
       </Box>
     </LocalizationProvider>
