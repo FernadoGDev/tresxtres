@@ -90,15 +90,11 @@ const confirmarJugador = async (index) => {
   const j = nuevos[index];
 
 const erroresJugador = {
-  nombre: !j.nombre,
-  apellido: !j.apellido,
-  dni: !j.dni,
-  telefono: !j.telefono,
-  email: !j.email,
-  barrio: !j.barrio,
-  direccion: !j.direccion,
- 
-   edad: !j.edad || Number(j.edad) < 16,
+  nombre: !j.nombre.trim(),
+  apellido: !j.apellido.trim(),
+  dni: !j.dni.trim(),
+  telefono: !j.telefono.trim(),
+  edad: !j.edad || Number(j.edad) < 16,
 };
 
   const tieneErrores = Object.values(erroresJugador).some(Boolean);
@@ -536,19 +532,28 @@ if (seleccionCapitan) {
                   sx={inputStyles}
                 />
 
-                <TextField
-                  label="DNI"
-                  type="number"
-                  value={jugador.dni}
-                  onChange={(e) =>
-                    handleChangeJugador(index, "dni", e.target.value)
-                  }
-                   error={errores[index]?.dni}
-  helperText={errores[index]?.dni ? "Ingrese el DNI" : ""}
-                  disabled={jugador.confirmado && !jugador.editando}
-                  fullWidth
-                  sx={inputStyles}
-                />
+               <TextField
+  label="DNI"
+  type="text"
+  value={jugador.dni}
+  onChange={(e) => {
+    const valor = e.target.value;
+
+    // Permite solamente números y puntos
+    if (/^[0-9.]*$/.test(valor)) {
+      handleChangeJugador(index, "dni", valor);
+    }
+  }}
+  error={errores[index]?.dni}
+  helperText={
+    errores[index]?.dni
+      ? "Ingrese el DNI"
+      : "Puede ingresar el DNI con o sin puntos"
+  }
+  disabled={jugador.confirmado && !jugador.editando}
+  fullWidth
+  sx={inputStyles}
+/>
 
  {/*         <DatePicker
   label="Fecha de nacimiento"
@@ -689,17 +694,14 @@ helperText={
                   <Button
                     variant="contained"
                     onClick={() => confirmarJugador(index)}
-                    disabled={
-    !jugador.nombre ||
-    !jugador.apellido ||
-    !jugador.dni ||
-    !jugador.telefono ||
-    !jugador.email ||
-    !jugador.barrio ||
-    !jugador.direccion ||
-    !jugador.edad ||
-    Number(jugador.edad) < 16
-  }
+     disabled={
+  !jugador.nombre.trim() ||
+  !jugador.apellido.trim() ||
+  !jugador.dni.trim() ||
+  !jugador.telefono.trim() ||
+  !jugador.edad ||
+  Number(jugador.edad) < 16
+}
                     sx={{
                       bgcolor: "#f97316",
                       "&:hover": { bgcolor: "#ea580c" },
