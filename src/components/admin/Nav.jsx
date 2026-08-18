@@ -1,8 +1,17 @@
-import { AppBar, Toolbar, Button, Box, Typography } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  Box,
+  Typography,
+} from "@mui/material";
+
 import SportsBasketballIcon from "@mui/icons-material/SportsBasketball";
 import GroupsIcon from "@mui/icons-material/Groups";
 import PersonIcon from "@mui/icons-material/Person";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import LogoutIcon from "@mui/icons-material/Logout";
+
 import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Navbar() {
@@ -27,6 +36,12 @@ export default function Navbar() {
     },
   ];
 
+  const handleLogout = () => {
+    localStorage.removeItem("loggedNoteAppUser");
+
+    navigate("/login", { replace: true });
+  };
+
   return (
     <AppBar
       position="sticky"
@@ -36,6 +51,8 @@ export default function Navbar() {
       }}
     >
       <Toolbar>
+
+        {/* Logo / título */}
         <Box
           sx={{
             display: "flex",
@@ -45,17 +62,21 @@ export default function Navbar() {
           }}
         >
           <SportsBasketballIcon />
+
           <Typography fontWeight="bold">
             Liga de Básquet
           </Typography>
         </Box>
 
+        {/* Botones */}
         <Box
           sx={{
             display: "flex",
+            alignItems: "center",
             gap: 1,
           }}
         >
+
           {botones.map((b) => (
             <Button
               key={b.ruta}
@@ -73,6 +94,7 @@ export default function Navbar() {
                   location.pathname === b.ruta
                     ? "#f97316"
                     : "transparent",
+
                 "&:hover": {
                   bgcolor: "#ea580c",
                 },
@@ -81,7 +103,28 @@ export default function Navbar() {
               {b.texto}
             </Button>
           ))}
+
+          {/* Logout */}
+          <Button
+            startIcon={<LogoutIcon />}
+            onClick={handleLogout}
+            sx={{
+              borderRadius: 3,
+              color: "#fff",
+              ml: 1,
+              border: "1px solid rgba(255,255,255,0.3)",
+
+              "&:hover": {
+                bgcolor: "#dc2626",
+                borderColor: "#dc2626",
+              },
+            }}
+          >
+            Salir
+          </Button>
+
         </Box>
+
       </Toolbar>
     </AppBar>
   );
