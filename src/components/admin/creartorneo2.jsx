@@ -1324,7 +1324,7 @@ export default function ConfigurarTorneo() {
                   </TableCell>
 
                   <TableCell>
-                    {eq.nombre}
+                    {eq.nombre}  <b>({eq.edicion} edicion)</b>
                   </TableCell>
 
                   <TableCell>

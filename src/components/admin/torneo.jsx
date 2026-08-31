@@ -27,22 +27,191 @@ const [clasificacion, setClasificacion] = useState(0);
 
   // 🔥 generar combinaciones
   const generarPartidos = (equipos) => {
-    const partidos = [];
+  const todosLosPartidos = [];
 
-    for (let i = 0; i < equipos.length; i++) {
-      for (let j = i + 1; j < equipos.length; j++) {
-        partidos.push({
-          equipo1: equipos[i],
-          equipo2: equipos[j],
-          goles1: "",
-          goles2: "",
-        });
+  // ==========================================
+  // GENERAR TODOS LOS CRUCES
+  // ==========================================
+
+  for (let i = 0; i < equipos.length; i++) {
+    for (let j = i + 1; j < equipos.length; j++) {
+      todosLosPartidos.push({
+        equipo1: equipos[i],
+        equipo2: equipos[j],
+        goles1: "",
+        goles2: "",
+      });
+    }
+  }
+
+  const partidos = [];
+  const restantes = [...todosLosPartidos];
+
+  // Cantidad de veces que cada equipo jugó
+  const cantidadPartidos = {};
+
+  equipos.forEach((equipo) => {
+    cantidadPartidos[equipo.id] = 0;
+  });
+
+  // Últimos partidos de cada equipo
+  const historial = {};
+
+  equipos.forEach((equipo) => {
+    historial[equipo.id] = [];
+  });
+
+  // ==========================================
+  // FUNCIÓN PARA SABER SI JUGÓ EL ÚLTIMO
+  // ==========================================
+
+  const jugoUltimo = (equipoId) => {
+    const historialEquipo = historial[equipoId];
+
+    if (!historialEquipo || historialEquipo.length === 0) {
+      return false;
+    }
+
+    return historialEquipo[historialEquipo.length - 1] === true;
+  };
+
+  // ==========================================
+  // CANTIDAD DE PARTIDOS SEGUIDOS
+  // ==========================================
+
+  const partidosSeguidos = (equipoId) => {
+    const historialEquipo = historial[equipoId];
+
+    let cantidad = 0;
+
+    for (let i = historialEquipo.length - 1; i >= 0; i--) {
+      if (historialEquipo[i] === true) {
+        cantidad++;
+      } else {
+        break;
       }
     }
 
-    return partidos;
+    return cantidad;
   };
 
+  // ==========================================
+  // ARMAR FIXTURE
+  // ==========================================
+
+  while (restantes.length > 0) {
+
+    let mejorPartido = null;
+    let mejorPuntaje = Infinity;
+
+    restantes.forEach((partido) => {
+
+      const id1 = partido.equipo1.id;
+      const id2 = partido.equipo2.id;
+
+      const seguidos1 = partidosSeguidos(id1);
+      const seguidos2 = partidosSeguidos(id2);
+
+      const juegaUltimo1 = jugoUltimo(id1);
+      const juegaUltimo2 = jugoUltimo(id2);
+
+      let puntaje = 0;
+
+      // ==========================================
+      // PENALIZAR PARTIDOS CONSECUTIVOS
+      // ==========================================
+
+      if (juegaUltimo1) {
+        puntaje += 100;
+      }
+
+      if (juegaUltimo2) {
+        puntaje += 100;
+      }
+
+      // ==========================================
+      // PENALIZAR MUCHO EL TERCERO SEGUIDO
+      // ==========================================
+
+      if (seguidos1 >= 2) {
+        puntaje += 10000;
+      }
+
+      if (seguidos2 >= 2) {
+        puntaje += 10000;
+      }
+
+      // ==========================================
+      // PREMIAR EQUIPOS QUE ESTÁN DESCANSANDO
+      // ==========================================
+
+      if (!juegaUltimo1) {
+        puntaje -= 20;
+      }
+
+      if (!juegaUltimo2) {
+        puntaje -= 20;
+      }
+
+      // ==========================================
+      // BALANCEAR CANTIDAD DE PARTIDOS
+      // ==========================================
+
+      const diferencia =
+        Math.abs(
+          cantidadPartidos[id1] -
+          cantidadPartidos[id2]
+        );
+
+      puntaje += diferencia * 10;
+
+      // ==========================================
+      // ELEGIR EL MEJOR
+      // ==========================================
+
+      if (puntaje < mejorPuntaje) {
+        mejorPuntaje = puntaje;
+        mejorPartido = partido;
+      }
+    });
+
+    // ==========================================
+    // AGREGAR EL PARTIDO ELEGIDO
+    // ==========================================
+
+    partidos.push(mejorPartido);
+
+    const id1 = mejorPartido.equipo1.id;
+    const id2 = mejorPartido.equipo2.id;
+
+    cantidadPartidos[id1]++;
+    cantidadPartidos[id2]++;
+
+    // ==========================================
+    // ACTUALIZAR HISTORIAL
+    // ==========================================
+
+    equipos.forEach((equipo) => {
+
+      if (
+        equipo.id === id1 ||
+        equipo.id === id2
+      ) {
+        historial[equipo.id].push(true);
+      } else {
+        historial[equipo.id].push(false);
+      }
+
+    });
+
+    // Sacar partido utilizado
+    const index = restantes.indexOf(mejorPartido);
+
+    restantes.splice(index, 1);
+  }
+
+  return partidos;
+};
 
 const generarPlayoff = async () => {
 
