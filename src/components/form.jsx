@@ -475,23 +475,105 @@ if (seleccionCapitan) {
 </Box>
 
           {/* EQUIPO */}
-        <Box
+<Box
   sx={{
     position: "sticky",
     top: 0,
-    zIndex: 1000,
-    py: 1,
-    background: "linear-gradient(135deg, #4CAF50 0%, #1E88E5 100%)",
+    zIndex: 1200,
+    py: 2,
+    px: 1,
+    mb: 1,
+    borderRadius: 4,
+    background: "linear-gradient(135deg, #14532d 0%, #1d4ed8 100%)",
+    boxShadow: "0 8px 25px rgba(0,0,0,0.3)",
+    border: "1px solid rgba(255,255,255,0.25)",
   }}
 >
+  <Typography
+    sx={{
+      color: "#fff",
+      fontSize: "1.25rem",
+      fontWeight: 900,
+      textAlign: "center",
+      mb: 0.5,
+      letterSpacing: 1,
+      textShadow: "0 2px 5px rgba(0,0,0,0.3)",
+    }}
+  >
+    🏀 ¡ARMÁ TU EQUIPO!
+  </Typography>
+
+  <Typography
+    sx={{
+      color: "#e2e8f0",
+      fontSize: "0.85rem",
+      textAlign: "center",
+      mb: 1.5,
+    }}
+  >
+    Primero, elegí el nombre que los representa
+  </Typography>
+
   <TextField
-    label="Nombre del equipo"
+    label="Nombre de tu equipo"
+    placeholder="Ej. Los Invencibles"
     value={equipo}
     onChange={(e) => setEquipo(e.target.value)}
     fullWidth
-    
-    sx={inputStyles}
+    required
+    inputProps={{ maxLength: 50 }}
+    sx={{
+      "& .MuiOutlinedInput-root": {
+        backgroundColor: "#fff",
+        borderRadius: 3,
+        color: "#0f172a",
+        fontSize: "1.1rem",
+        fontWeight: "bold",
+
+        "& input": {
+          color: "#0f172a",
+          WebkitTextFillColor: "#0f172a",
+          py: 1.8,
+        },
+
+        "& fieldset": {
+          borderColor: "#fff",
+          borderWidth: 2,
+        },
+
+        "&:hover fieldset": {
+          borderColor: "#fbbf24",
+        },
+
+        "&.Mui-focused fieldset": {
+          borderColor: "#f97316",
+          borderWidth: 2,
+        },
+      },
+
+      "& .MuiInputLabel-root": {
+        color: "#475569",
+        fontWeight: "bold",
+      },
+
+      "& .MuiInputLabel-root.Mui-focused": {
+        color: "#ea580c",
+      },
+    }}
   />
+
+  <Typography
+    sx={{
+      color: "#fff",
+      fontSize: "0.75rem",
+      mt: 1,
+      textAlign: "center",
+    }}
+  >
+    {equipo.trim()
+      ? `🔥 ${equipo}`
+      : "El nombre aparecerá acá cuando lo escribas"}
+  </Typography>
 </Box>
 <Box
   sx={{
