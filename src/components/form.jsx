@@ -6,6 +6,8 @@ import {
   Typography,
   Paper,
   IconButton,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import banner from "../assets/Banner.jpeg";
@@ -23,6 +25,7 @@ const jugadorVacio = {
   direccion: "",
   edad: "",
   fechaNacimiento: null,
+  federado: false, // NUEVO
   confirmado: false,
   editando: false,
 };
@@ -208,18 +211,18 @@ const handleSubmit = async () => {
   if (jugadoresConfirmados < 3 || !equipo) return;
 
   try {
-   const jugadoresValidos = jugadores
+const jugadoresValidos = jugadores
   .filter(j => j.confirmado)
   .map(j => ({
     nombre: j.nombre,
     apellido: j.apellido,
     dni: j.dni,
- //   fechaNacimiento: j.fechaNacimiento,
     telefono: j.telefono,
     email: j.email,
     barrio: j.barrio,
     direccion: j.direccion,
     edad: j.edad,
+    federado: j.federado, // NUEVO
   }));
 
    const payload = {
@@ -726,6 +729,30 @@ if (seleccionCapitan) {
     max: 99,
   }}
   sx={inputStyles}
+/>
+<FormControlLabel
+  control={
+    <Checkbox
+      checked={jugador.federado}
+      onChange={(e) =>
+        handleChangeJugador(index, "federado", e.target.checked)
+      }
+      disabled={jugador.confirmado && !jugador.editando}
+      sx={{
+        color: "#94a3b8",
+        "&.Mui-checked": {
+          color: "#22c55e",
+        },
+      }}
+    />
+  }
+  label="¿Es jugador federado?"
+  sx={{
+    color: "#fff",
+    "& .MuiFormControlLabel-label": {
+      fontWeight: "bold",
+    },
+  }}
 />
     <TextField
                   label="Telefono de contacto"
