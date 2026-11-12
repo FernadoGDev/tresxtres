@@ -20,7 +20,44 @@ import {
 import { useParams } from "react-router-dom";
 import servicio from "../../services/servicio";
 import PlayoffView from "./playoffs";
-
+const coloresZonas = [
+  {
+    fondo: "#F0F7FF",
+    borde: "#90CAF9",
+    encabezado: "#D6E9FF",
+    texto: "#174A7E",
+  },
+  {
+    fondo: "#F1F8F3",
+    borde: "#81C784",
+    encabezado: "#D9EFDC",
+    texto: "#245B32",
+  },
+  {
+    fondo: "#FFF8ED",
+    borde: "#FFCC80",
+    encabezado: "#FFE9C7",
+    texto: "#895313",
+  },
+  {
+    fondo: "#F8F2FC",
+    borde: "#CE93D8",
+    encabezado: "#EEDCF4",
+    texto: "#653779",
+  },
+  {
+    fondo: "#FFF2F2",
+    borde: "#EF9A9A",
+    encabezado: "#FFDDDD",
+    texto: "#8B3030",
+  },
+  {
+    fondo: "#F0F7F7",
+    borde: "#80CBC4",
+    encabezado: "#D3EBE8",
+    texto: "#24645E",
+  },
+];
 export default function TorneoView() {
   const { id } = useParams();
 
@@ -1001,231 +1038,270 @@ todosLosPartidos.forEach((p) => {
         )}
       </Paper>
 
-      {/* =====================================
-          ZONAS
-      ====================================== */}
+    
+{/* =====================================
+    ZONAS
+====================================== */}
 
-      <Box
-        display="flex"
-        gap={3}
-        alignItems="flex-start"
-        flexWrap="wrap"
+<Box
+  sx={{
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 560px), 1fr))",
+    gap: 3,
+    alignItems: "start",
+  }}
+>
+  {zonas.map((zona, index) => {
+    const tablaZona = calcularTablaZona(zona);
+
+    const seleccion = nuevoPartidoZona[zona.id] || {
+      equipo1: "",
+      equipo2: "",
+    };
+
+    const color = coloresZonas[index % coloresZonas.length];
+
+    return (
+      <Paper
+        key={zona.id}
+        elevation={3}
+        sx={{
+          minWidth: 0,
+          overflow: "hidden",
+          borderRadius: 3,
+          backgroundColor: color.fondo,
+          border: `1px solid ${color.borde}`,
+          borderTop: `5px solid ${color.borde}`,
+        }}
       >
-        {zonas.map((zona) => {
-          const tablaZona = calcularTablaZona(zona);
+        {/* ENCABEZADO DE ZONA */}
 
-          const seleccion =
-            nuevoPartidoZona[zona.id] || {
-              equipo1: "",
-              equipo2: "",
-            };
-
-          return (
-            <Paper
-              key={zona.id}
-              sx={{
-                p: 2,
-                minWidth: 350,
-                flex: "1 1 450px",
-                borderRadius: 3,
-                boxShadow: 3,
-              }}
+        <Box
+          sx={{
+            px: 2.5,
+            py: 2,
+            backgroundColor: color.encabezado,
+            borderBottom: `1px solid ${color.borde}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1,
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h6"
+              fontWeight="bold"
+              sx={{ color: color.texto }}
             >
-              <Typography variant="h6" mb={2}>
-                {zona.nombre || `Zona ${zona.id}`}
-              </Typography>
+              {zona.nombre || `Zona ${zona.id}`}
+            </Typography>
 
-              {/* TABLA */}
+            <Typography
+              variant="caption"
+              sx={{ color: color.texto, opacity: 0.8 }}
+            >
+              {zona.equipos.length} equipos participantes
+            </Typography>
+          </Box>
 
-              <Box sx={{ overflowX: "auto" }}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>#</TableCell>
-                      <TableCell>Equipo</TableCell>
-                      <TableCell align="center">Pts</TableCell>
-                      <TableCell align="center">PJ</TableCell>
-                      <TableCell align="center">PG</TableCell>
-                      <TableCell align="center">PE</TableCell>
-                      <TableCell align="center">PP</TableCell>
-                      <TableCell align="center">GF</TableCell>
-                      <TableCell align="center">GC</TableCell>
-                      <TableCell align="center">DG</TableCell>
-                    </TableRow>
-                  </TableHead>
+          <Box
+            sx={{
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 2,
+              backgroundColor: "rgba(255,255,255,0.65)",
+              color: color.texto,
+              fontWeight: "bold",
+              fontSize: 13,
+            }}
+          >
+            ZONA {index + 1}
+          </Box>
+        </Box>
 
-                  <TableBody>
-                    {tablaZona.map((fila, index) => (
-                      <TableRow
-                        key={fila.equipo.id}
+        <Box sx={{ p: 2 }}>
+          {/* TABLA */}
+
+          <Typography fontWeight="bold" mb={1.5} color={color.texto}>
+            Tabla de posiciones
+          </Typography>
+
+          <Box
+            sx={{
+              overflowX: "auto",
+              borderRadius: 2,
+              backgroundColor: "white",
+              border: "1px solid #e0e0e0",
+            }}
+          >
+            <Table size="small" sx={{ minWidth: 650 }}>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: color.encabezado }}>
+                  {["#", "Equipo", "Pts", "PJ", "PG", "PE", "PP", "GF", "GC", "DG"].map(
+                    (titulo) => (
+                      <TableCell
+                        key={titulo}
+                        align={titulo === "Equipo" ? "left" : "center"}
                         sx={{
-                          backgroundColor: clasificados.has(
-                            fila.equipo.id
-                          )
-                            ? "#c8e6c9"
-                            : "inherit",
+                          fontWeight: "bold",
+                          color: color.texto,
+                          whiteSpace: "nowrap",
+                          px: 1,
                         }}
                       >
-                        <TableCell>{index + 1}</TableCell>
+                        {titulo}
+                      </TableCell>
+                    )
+                  )}
+                </TableRow>
+              </TableHead>
 
-                        <TableCell
-                          sx={{ fontWeight: "bold" }}
-                        >
-                          {fila.equipo.nombre}
-                        </TableCell>
-
-                        <TableCell align="center">
-                          {fila.puntos}
-                        </TableCell>
-
-                        <TableCell align="center">
-                          {fila.pj}
-                        </TableCell>
-
-                        <TableCell align="center">
-                          {fila.pg}
-                        </TableCell>
-
-                        <TableCell align="center">
-                          {fila.pe}
-                        </TableCell>
-
-                        <TableCell align="center">
-                          {fila.pp}
-                        </TableCell>
-
-                        <TableCell align="center">
-                          {fila.gf}
-                        </TableCell>
-
-                        <TableCell align="center">
-                          {fila.gc}
-                        </TableCell>
-
-                        <TableCell align="center">
-                          {fila.dg}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Box>
-
-              <Divider sx={{ my: 3 }} />
-
-              {/* AGREGAR PARTIDO ADICIONAL */}
-
-              <Typography fontWeight="bold" mb={1}>
-                Agregar partido adicional
-              </Typography>
-
-              <FormControl fullWidth size="small" sx={{ mb: 1 }}>
-                <InputLabel>Equipo 1</InputLabel>
-
-                <Select
-                  value={seleccion.equipo1}
-                  label="Equipo 1"
-                  onChange={(e) =>
-                    setNuevoPartidoZona((prev) => ({
-                      ...prev,
-                      [zona.id]: {
-                        ...seleccion,
-                        equipo1: e.target.value,
+              <TableBody>
+                {tablaZona.map((fila, index) => (
+                  <TableRow
+                    key={fila.equipo.id}
+                    sx={{
+                      backgroundColor: clasificados.has(fila.equipo.id)
+                        ? "#D8F3DC"
+                        : "white",
+                      "&:hover": {
+                        backgroundColor: "#F5F5F5",
                       },
-                    }))
-                  }
-                >
-                  {zona.equipos.map((e) => (
-                    <MenuItem
-                      key={e.id}
-                      value={e.id}
-                      disabled={
-                        Number(e.id) ===
-                        Number(seleccion.equipo2)
-                      }
-                    >
-                      {e.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth size="small" sx={{ mb: 1 }}>
-                <InputLabel>Equipo 2</InputLabel>
-
-                <Select
-                  value={seleccion.equipo2}
-                  label="Equipo 2"
-                  onChange={(e) =>
-                    setNuevoPartidoZona((prev) => ({
-                      ...prev,
-                      [zona.id]: {
-                        ...seleccion,
-                        equipo2: e.target.value,
-                      },
-                    }))
-                  }
-                >
-                  {zona.equipos.map((e) => (
-                    <MenuItem
-                      key={e.id}
-                      value={e.id}
-                      disabled={
-                        Number(e.id) ===
-                        Number(seleccion.equipo1)
-                      }
-                    >
-                      {e.nombre}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <Button
-                fullWidth
-                variant="outlined"
-                color="warning"
-                onClick={() => agregarPartidoZona(zona)}
-              >
-                + Agregar partido en esta zona
-              </Button>
-
-              <Divider sx={{ my: 3 }} />
-
-              {/* PARTIDOS */}
-
-              <Typography fontWeight="bold" mb={2}>
-                Partidos de la zona
-              </Typography>
-
-              {(partidosPorZona[zona.id] || []).map(
-                (p, index) => (
-                  <React.Fragment
-                    key={p.id_partido || `nuevo-${zona.id}-${index}`}
+                    }}
                   >
-                    {p.adicional && (
-                      <Typography
-                        variant="caption"
-                        color="warning.dark"
-                        fontWeight="bold"
-                      >
-                        PARTIDO ADICIONAL / DESEMPATE
-                      </Typography>
-                    )}
+                    <TableCell>{index + 1}</TableCell>
 
-                    {renderPartido(
-                      p,
-                      index,
-                      "zona",
-                      zona.id
-                    )}
-                  </React.Fragment>
-                )
+                    <TableCell sx={{ fontWeight: "bold", minWidth: 130 }}>
+                      {fila.equipo.nombre}
+                    </TableCell>
+
+                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                      {fila.puntos}
+                    </TableCell>
+
+                    <TableCell align="center">{fila.pj}</TableCell>
+                    <TableCell align="center">{fila.pg}</TableCell>
+                    <TableCell align="center">{fila.pe}</TableCell>
+                    <TableCell align="center">{fila.pp}</TableCell>
+                    <TableCell align="center">{fila.gf}</TableCell>
+                    <TableCell align="center">{fila.gc}</TableCell>
+                    <TableCell align="center">{fila.dg}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+
+          <Divider sx={{ my: 2.5, borderColor: color.borde }} />
+
+          {/* AGREGAR PARTIDO ADICIONAL */}
+
+          <Typography fontWeight="bold" mb={1.5} color={color.texto}>
+            Agregar partido adicional
+          </Typography>
+
+          <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
+            <InputLabel>Equipo 1</InputLabel>
+
+            <Select
+              value={seleccion.equipo1}
+              label="Equipo 1"
+              onChange={(e) =>
+                setNuevoPartidoZona((prev) => ({
+                  ...prev,
+                  [zona.id]: {
+                    ...seleccion,
+                    equipo1: e.target.value,
+                  },
+                }))
+              }
+            >
+              {zona.equipos.map((e) => (
+                <MenuItem
+                  key={e.id}
+                  value={e.id}
+                  disabled={Number(e.id) === Number(seleccion.equipo2)}
+                >
+                  {e.nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
+            <InputLabel>Equipo 2</InputLabel>
+
+            <Select
+              value={seleccion.equipo2}
+              label="Equipo 2"
+              onChange={(e) =>
+                setNuevoPartidoZona((prev) => ({
+                  ...prev,
+                  [zona.id]: {
+                    ...seleccion,
+                    equipo2: e.target.value,
+                  },
+                }))
+              }
+            >
+              {zona.equipos.map((e) => (
+                <MenuItem
+                  key={e.id}
+                  value={e.id}
+                  disabled={Number(e.id) === Number(seleccion.equipo1)}
+                >
+                  {e.nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={() => agregarPartidoZona(zona)}
+            sx={{
+              backgroundColor: color.texto,
+              "&:hover": {
+                backgroundColor: color.texto,
+                filter: "brightness(0.85)",
+              },
+            }}
+          >
+            + Agregar partido en esta zona
+          </Button>
+
+          <Divider sx={{ my: 2.5, borderColor: color.borde }} />
+
+          {/* PARTIDOS */}
+
+          <Typography fontWeight="bold" mb={2} color={color.texto}>
+            Partidos de la zona ({(partidosPorZona[zona.id] || []).length})
+          </Typography>
+
+          {(partidosPorZona[zona.id] || []).map((p, index) => (
+            <React.Fragment
+              key={p.id_partido || `nuevo-${zona.id}-${index}`}
+            >
+              {p.adicional && (
+                <Typography
+                  variant="caption"
+                  color="warning.dark"
+                  fontWeight="bold"
+                >
+                  PARTIDO ADICIONAL / DESEMPATE
+                </Typography>
               )}
-            </Paper>
-          );
-        })}
-      </Box>
+
+              {renderPartido(p, index, "zona", zona.id)}
+            </React.Fragment>
+          ))}
+        </Box>
+      </Paper>
+    );
+  })}
+</Box>
 
       <PlayoffView id_torneo={id} />
     </Box>
