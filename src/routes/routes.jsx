@@ -1,6 +1,7 @@
 
 
 import Ruta1 from '../pages/formulario/index';
+import Ruta2 from '../pages/formularioaux';
 import Jugadores from '../pages/adminjugadores';
 import Torneos from '../pages/admintorneos';
 import Creartorneo from '../pages/admincreartorneo';
@@ -14,6 +15,7 @@ const Rutas = [
     { path: '/', element: <Ruta1 /> },
       { path: '/login', element: <Login /> },
 { path: '/formulario', element: <Ruta1 /> },
+{ path: '/formularioaux', element: <Ruta2 /> },
 { path: '/adminjugadores', element: <Jugadores /> },
 { path: '/admintorneos', element: <Torneos /> },
 { path: '/adminequipos', element: <Adminequipos /> },
