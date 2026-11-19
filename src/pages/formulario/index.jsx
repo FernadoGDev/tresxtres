@@ -9,7 +9,7 @@ const HeroSection = () => {
   return (
    <>
   
-   <Lleno/>
+   <Formulario/>
    </>
   );
 };
